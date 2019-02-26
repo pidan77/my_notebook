@@ -1,0 +1,273 @@
+常用sql汇总了一些日常开发调试排错中经常使用的sql语句，以oracle为主，其他数据库有特殊标注
+
+plsql F5查看sql执行计划，和索引使用情况
+owner_id和其他字段组成组合索引，方便代码中使用索引
+主键是聚合索引,非聚合索引查到ID，再通过聚合索引获取记录值(组合索引除外)[详细搜索oracle索引]
+
+创建一张表及其索引
+----------------------------------------------------------------------------------------------------------
+-- Create table
+create table TC_FRIEND
+(
+  OWNER_ID            NUMBER(22) default 0.0 not null,
+  FRIEND_ID           NUMBER(22) default 0.0 not null,
+  FRIEND_TYPE         NUMBER(6) default 0.0 not null,
+  FRIEND_CODE0        VARCHAR2(32),
+  FRIEND_CODE1        VARCHAR2(32),
+  FRIEND_CODE2        VARCHAR2(32),
+  FRIEND_CODE3        VARCHAR2(32),
+  FRIEND_CODE4        VARCHAR2(32),
+  FRIEND_CODE5        VARCHAR2(32),
+  FRIEND_CODE6        VARCHAR2(32),
+  FRIEND_CODE7        VARCHAR2(32),
+  FRIEND_CODE8        VARCHAR2(32),
+  FRIEND_CODE9        VARCHAR2(32),
+  FRIEND_SIMPLE_CODE  VARCHAR2(32),
+  FRIEND_NAME         VARCHAR2(128),
+  FRIEND_CLASS_ID     NUMBER(22) default 0.0 not null,
+  FRIEND_CARD_TYPE    NUMBER(6) default 0 not null,
+  FRIEND_CARD_NO      VARCHAR2(128),
+  FRIEND_ADDRESS      VARCHAR2(256),
+  FRIEND_CITY         VARCHAR2(64),
+  FRIEND_PROVINCE     VARCHAR2(64),
+  FRIEND_COUNTRY      VARCHAR2(64),
+  FRIEND_ZIP_CODE     VARCHAR2(32),
+  FRIEND_PHONE        VARCHAR2(256),
+  FRIEND_MOBILE_PHONE VARCHAR2(64),
+  FRIEND_FAX          VARCHAR2(64),
+  FRIEND_EMAIL        VARCHAR2(128),
+  FRIEND_HOMEPAGE     VARCHAR2(256),
+  FRIEND_MEMO1K       VARCHAR2(2048),
+  SRC_TYPE            NUMBER(6) default 0.0 not null,
+  STOP_FLAG           NUMBER(6) default 0.0 not null,
+  CREATE_EMP_ID       NUMBER(22) default 0 not null,
+  CREATE_TIME         DATE not null,
+  MODIFY_EMP_ID       NUMBER(22) not null,
+  MODIFY_TIME         DATE not null,
+  TOUCH_TIME          DATE,
+  FRIEND_DEC1         NUMBER(20,4) default 0.0 not null,
+  FRIEND_DEC2         NUMBER(20,4) default 0.0 not null,
+  FRIEND_DEC3         NUMBER(20,4) default 0.0 not null,
+  FRIEND_DEC4         NUMBER(20,4) default 0.0 not null
+)
+tablespace CRM_DATA
+  pctfree 10
+  initrans 2
+  maxtrans 255
+  storage
+  (
+    initial 64
+    next 1
+    minextents 1
+    maxextents unlimited
+  );
+-- Add comments to the table 
+comment on table TC_FRIEND
+  is '客户表';
+-- Add comments to the columns 
+comment on column TC_FRIEND.OWNER_ID
+  is '使用单位id,值通常为1';
+comment on column TC_FRIEND.FRIEND_ID
+  is '客户id';
+comment on column TC_FRIEND.FRIEND_TYPE
+  is '类型';
+comment on column TC_FRIEND.FRIEND_CODE9
+  is '暂避免后台脚本触发TRIG_TC_FRIEND_BEFORE使用';
+comment on column TC_FRIEND.FRIEND_SIMPLE_CODE
+  is '助记符';
+comment on column TC_FRIEND.FRIEND_NAME
+  is '客户名称';
+comment on column TC_FRIEND.FRIEND_CLASS_ID
+  is '客户分类';
+comment on column TC_FRIEND.FRIEND_CARD_TYPE
+  is '证件类型';
+comment on column TC_FRIEND.FRIEND_CARD_NO
+  is '证件号码';
+comment on column TC_FRIEND.FRIEND_ADDRESS
+  is '详细地址';
+comment on column TC_FRIEND.FRIEND_CITY
+  is '所在城市';
+comment on column TC_FRIEND.FRIEND_PROVINCE
+  is '所在省';
+comment on column TC_FRIEND.FRIEND_COUNTRY
+  is '国家';
+comment on column TC_FRIEND.FRIEND_ZIP_CODE
+  is '邮编';
+comment on column TC_FRIEND.FRIEND_PHONE
+  is '电话';
+comment on column TC_FRIEND.FRIEND_MOBILE_PHONE
+  is '移动电话';
+comment on column TC_FRIEND.FRIEND_FAX
+  is '传真';
+comment on column TC_FRIEND.FRIEND_EMAIL
+  is '电子邮件';
+comment on column TC_FRIEND.FRIEND_HOMEPAGE
+  is '主页';
+comment on column TC_FRIEND.FRIEND_MEMO1K
+  is '备注';
+comment on column TC_FRIEND.SRC_TYPE
+  is '来源类型';
+comment on column TC_FRIEND.STOP_FLAG
+  is '停用标志';
+comment on column TC_FRIEND.CREATE_EMP_ID
+  is '创建人';
+comment on column TC_FRIEND.CREATE_TIME
+  is '创建时间';
+comment on column TC_FRIEND.MODIFY_EMP_ID
+  is '最后修改人';
+comment on column TC_FRIEND.MODIFY_TIME
+  is '最后修改时间';
+comment on column TC_FRIEND.TOUCH_TIME
+  is '最近联络时间';
+comment on column TC_FRIEND.FRIEND_DEC1
+  is '客户描述';
+-- Create/Recreate primary, unique and foreign key constraints 
+alter table TC_FRIEND
+  add constraint PK_TC_FRIEND primary key (OWNER_ID, FRIEND_ID)
+  using index 
+  tablespace CRM_INDX
+  pctfree 10
+  initrans 2
+  maxtrans 255
+  storage
+  (
+    initial 64K
+    next 1M
+    minextents 1
+    maxextents unlimited
+  );
+alter table TC_FRIEND
+  add constraint U_TC_FRIEND_FNAME unique (FRIEND_NAME)
+  using index 
+  tablespace CRM_INDX
+  pctfree 10
+  initrans 4
+  maxtrans 255
+  storage
+  (
+    initial 64K
+    next 1M
+    minextents 1
+    maxextents unlimited
+  );
+-- Create/Recreate indexes 
+create index I_C_EMP_TIME on TC_FRIEND (CREATE_EMP_ID, CREATE_TIME)
+  tablespace CRM_INDX
+  pctfree 10
+  initrans 2
+  maxtrans 255
+  storage
+  (
+    initial 64K
+    next 1M
+    minextents 1
+    maxextents unlimited
+  );
+create index I_FRIEND_MODIFY_TIME on TC_FRIEND (MODIFY_TIME)
+  tablespace CRM_INDX
+  pctfree 10
+  initrans 4
+  maxtrans 255
+  storage
+  (
+    initial 64K
+    next 1M
+    minextents 1
+    maxextents unlimited
+  );
+create index I_FRIEND_SCODE on TC_FRIEND (FRIEND_SIMPLE_CODE)
+  tablespace CRM_INDX
+  pctfree 10
+  initrans 2
+  maxtrans 255
+  storage
+  (
+    initial 64K
+    next 1M
+    minextents 1
+    maxextents unlimited
+  );
+create index I_TC_FRIEND_CID_CTIME on TC_FRIEND (CREATE_EMP_ID, OWNER_ID, CREATE_TIME)
+  tablespace CRM_INDX
+  pctfree 10
+  initrans 2
+  maxtrans 255
+  storage
+  (
+    initial 64K
+    next 1M
+    minextents 1
+    maxextents unlimited
+  );
+-- Grant/Revoke object privileges 
+grant select on TC_FRIEND to CRM_RONLY;
+grant select on TC_FRIEND to CRM_SEARCH;
+grant select on TC_FRIEND to DW_ETL;
+grant select on TC_FRIEND to "LI.SHUO";
+grant select on TC_FRIEND to RD_RONLY;
+grant select, insert, update, delete, alter on TC_FRIEND to ROLE_CRM;
+grant select on TC_FRIEND to ROLE_DW_ETL;
+grant select on TC_FRIEND to USER_READ;
+grant select on TC_FRIEND to "XIULI.SHAN";
+grant select on TC_FRIEND to "XUE.DING";
+grant select on TC_FRIEND to ZPADV;
+grant select on TC_FRIEND to ZP_LXR;
+grant select, update on TC_FRIEND to ZP_ORDER;
+grant select on TC_FRIEND to ZP_STATISTIC;
+grant select on TC_FRIEND to ZP_TEL;
+grant select on TC_FRIEND to ZP_TRAINEE;
+----------------------------------------------------------------------------------------------------------
+
+统计查重
+select count(t.mng_dept_id),count(t.mng_dept_name),count(distinct t.mng_root_dept_id),count(distinct t.mng_root_dept_name) from zp_mng_root_name t
+
+分页查询
+sql:select t.* from dc_audit_cust_dis_name t where 1=1
+pageNumber:页数
+pageSize:显示行数
+分页
+select * from (select a.*,rownum row_num from ("+sql+") a ) b where b.row_num between "+[(page-1)*rows+1]+" and "+[page*rows]
+总记录数
+select count(*) from dc_audit_cust_dis_name t where 1=1
+###between and 是闭区间
+
+日期时间闭区间查询
+select t.* from dc_audit_cust_dis_name t where 1=1
+and t.create_time>=to_date('2018-06-01 0:0:0','yyyy-mm-dd hh24:mi:ss')
+and t.create_time<=to_date('2018-06-02 23:59:59','yyyy-mm-dd hh24:mi:ss')
+
+根据序列获取主键
+select seq_dc_audit_cust_dis_name.nextval from dual
+
+插入一条记录
+ insert into dc_audit_cust_dis_name	
+  (dc_cust_id,	
+   crm_cust_id,	
+   cust_name,	
+   cust_displayname,	
+   is_hide,	
+   apply_emp_id,	
+   crm_mng_id,	")
+   create_time,	
+   process_result,	
+   dc_version)	
+values	
+  (seq_licenseinfo.nextval, ?, ?, ?, ?, ?, ?, sysdate, 1, 0)
+
+oracle in操作符参数(Oracle 9i 中个数不能超过256,Oracle 10g个数不能超过1000)
+1.对参数进行处理，分成多个in，其中每个in列表中参数都小于1000，如 params in(1,2,3.........1000) or  params in(1001,1002...2000).不过这种方法性能和维护性方面不好
+2.是将in后面的字符串改成了子查询，将in里面的数据保存到临时表中，params in（select ....from dual)
+
+树形递归查询(从根到子，从子到根的区分)
+从根到子遍历出全部
+select t.resource_id id,t.resource_type type,rpad(' ',(level-1)*4)||t.name name,t.remark,t.seq,t.url,t.pid,t.stop_flag from cust_resource t where t.stop_flag = 0  
+connect by t.pid = prior t.resource_id  
+start with t.pid = -1 order siblings by t.seq
+
+
+
+
+
+
+
+
