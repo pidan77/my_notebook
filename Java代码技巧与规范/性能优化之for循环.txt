@@ -1,0 +1,93 @@
+1.嵌套循环
+-----------------------------------------------------------------
+stratTime = System.nanoTime();
+for (int i = 0; i < 10000000; i++) {
+	for (int j = 0; j < 10; j++) {
+		
+	}
+}
+endTime = System.nanoTime();
+System.out.println("外大内小耗时："+ (endTime - stratTime));	
+-----------------------------------------------------------------
+stratTime = System.nanoTime();
+for (int i = 0; i <10 ; i++) {
+	for (int j = 0; j < 10000000; j++) {
+		
+	}
+}
+endTime = System.nanoTime();
+System.out.println("外小内大耗时："+(endTime - stratTime));
+-----------------------------------------------------------------
+外大内小耗时：<span class="hljs-number">200192114</span>
+外小内大耗时：<span class="hljs-number">97995997</span>
+-----------------------------------------------------------------
+由以上对比可知，优化后性能提升了一倍，嵌套循环应该遵循“外小内大”的原则，这就好比你复制很多个小文件和复制几个大文件的区别。
+
+2.提取与循环无关的表达式
+-----------------------------------------------------------------
+stratTime = System.nanoTime();
+for (int i = 0; i < 10000000; i++) {
+	i=i*a*b;
+}
+endTime = System.nanoTime();
+System.out.println("未提取耗时："+(endTime - stratTime));
+----------------------------------------------------------------- 
+stratTime = System.nanoTime();
+c = a*b;
+for (int i = 0; i < 10000000; i++) {
+	i=i*c;
+}
+endTime = System.nanoTime();
+System.out.println("已提取耗时："+(endTime - stratTime));
+----------------------------------------------------------------- 
+未提取耗时：<span class="hljs-number">45973050</span>
+已提取耗时：<span class="hljs-number">1955</span>
+-----------------------------------------------------------------
+代码中a+b与我们的循环无关，所以应该把它放到外面，避免重复计算，可以看出，优化后性能提升了好几个数量级，这些是不容忽视的。
+
+3.消除循环终止判断时的方法调用
+-----------------------------------------------------------------
+stratTime = System.nanoTime();
+for (int i = 0; i < list.size(); i++) {
+	
+}
+endTime = System.nanoTime();
+System.out.println("未优化list耗时："+(endTime - stratTime));
+----------------------------------------------------------------- 
+stratTime = System.nanoTime();
+int size = list.size();
+for (int i = 0; i < size; i++) {
+	
+}
+endTime = System.nanoTime();
+System.out.println("优化list耗时："+(endTime - stratTime));
+----------------------------------------------------------------- 
+未优化list耗时：<span class="hljs-number">27375</span>
+优化list耗时：<span class="hljs-number">2444</span>
+-----------------------------------------------------------------
+list.size()每次循环都会被执行一次，这无疑会影响程序的性能，所以应该将其放到循环外面，用一个变量来代替，优化前后的对比也很明显。
+
+4.异常捕获
+stratTime = System.nanoTime();
+for (int i = 0; i < 10000000; i++) {
+	try {
+	} catch (Exception e) {
+	}
+}
+endTime = System.nanoTime();
+System.out.println("在内部捕获异常耗时："+(endTime - stratTime));
+-----------------------------------------------------------------
+stratTime = System.nanoTime();
+try {
+	for (int i = 0; i < 10000000; i++) {
+	}
+} catch (Exception e) {
+
+}
+endTime = System.nanoTime();
+System.out.println("在外部捕获异常耗时："+(endTime - stratTime));
+-----------------------------------------------------------------
+在内部捕获异常耗时：<span class="hljs-number">12150142</span>
+在外部捕获异常耗时：<span class="hljs-number">1955</span>
+-----------------------------------------------------------------
+大家都知道，捕获异常是很耗资源的，所以不要讲try catch放到循环内部，优化后同样有好几个数量级的提升。
