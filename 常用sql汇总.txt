@@ -273,7 +273,28 @@ select t.resource_id id,t.resource_type type,rpad(' ',(level-1)*4)||t.name name,
 connect by t.pid = prior t.resource_id  
 start with t.pid = -1 order siblings by t.seq
 
-
+for update的使用场景
+如果遇到存在高并发并且对于数据的准确性很有要求的场景，是需要了解和使用for update的。比如涉及到金钱、库存等。
+记住一个原则：一锁二判三更新
+InnoDB默认是行级别的锁，当有明确指定的主键时候，是行级锁。否则是表级别。
+    例子: 假设表foods ，存在有id跟name、status三个字段，id是主键，status有索引。
+    例1: (明确指定主键，并且有此记录，行级锁) 
+    SELECT * FROM foods WHERE id=1 FOR UPDATE; 
+    SELECT * FROM foods WHERE id=1 and name=’咖啡色的羊驼’ FOR UPDATE;
+    例2: (明确指定主键/索引，若查无此记录，无锁) 
+    SELECT * FROM foods WHERE id=-1 FOR UPDATE;
+    例3: (无主键/索引，表级锁) 
+    SELECT * FROM foods WHERE name=’咖啡色的羊驼’ FOR UPDATE;
+    例4: (主键/索引不明确，表级锁) 实验结果oracle不会锁表，只锁结果集
+    SELECT * FROM foods WHERE id<>’3’ FOR UPDATE; 
+    SELECT * FROM foods WHERE id LIKE ‘3’ FOR UPDATE;
+1.for update 仅适用于InnoDB，并且必须开启事务，在begin与commit之间才生效。
+2.要测试for update的锁表情况，可以利用MySQL的Command Mode，开启二个视窗来做测试。
+for update的疑问点
+    当开启一个事务进行for update的时候，另一个事务也有for update的时候会一直等着，直到第一个事务结束吗？
+    答：会的。除非第一个事务commit或者rollback或者断开连接，第二个事务会立马拿到锁进行后面操作。
+    如果没查到记录会锁表吗？
+    答：会的。表级锁时，不管是否查询到记录，都会锁定表。
 
 
 
