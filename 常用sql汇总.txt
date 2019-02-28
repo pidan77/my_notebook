@@ -223,12 +223,21 @@ select count(t.mng_dept_id),count(t.mng_dept_name),count(distinct t.mng_root_dep
 
 分页查询
 sql:select t.* from dc_audit_cust_dis_name t where 1=1
-pageNumber:页数
-pageSize:显示行数
+pageSize:页大小
+pageNo:页号
+startIndex:(pageNo - 1) * pageSize
 分页
-select * from (select a.*,rownum row_num from ("+sql+") a ) b where b.row_num between "+[(page-1)*rows+1]+" and "+[page*rows]
+oracle:"select * " + " from (select row_.*, rownum rownum_ "
+                + " from (" + sql + ") row_" + " where rownum <= "
+                + (startIndex + pageSize) + ")" + " where rownum_ >"
+                + startIndex
+注意：>不是>=
+mysql:sql + " limit "+startIndex+","+pageSize+" "
+注意：起点不包含startIndex,和数组一样
+pg:sql + " limit "+pageSize+" offset "+startIndex+" "
+注意：起点不包含startIndex,和数组一样
 总记录数
-select count(*) from dc_audit_cust_dis_name t where 1=1
+select count(*) from (" + sql + ") t
 ###between and 是闭区间
 
 日期时间闭区间查询
@@ -240,18 +249,18 @@ and t.create_time<=to_date('2018-06-02 23:59:59','yyyy-mm-dd hh24:mi:ss')
 select seq_dc_audit_cust_dis_name.nextval from dual
 
 插入一条记录
- insert into dc_audit_cust_dis_name	
-  (dc_cust_id,	
-   crm_cust_id,	
-   cust_name,	
-   cust_displayname,	
-   is_hide,	
-   apply_emp_id,	
-   crm_mng_id,	")
-   create_time,	
-   process_result,	
-   dc_version)	
-values	
+ insert into dc_audit_cust_dis_name 
+  (dc_cust_id,  
+   crm_cust_id, 
+   cust_name, 
+   cust_displayname,  
+   is_hide, 
+   apply_emp_id,  
+   crm_mng_id,  ")
+   create_time, 
+   process_result,  
+   dc_version)  
+values  
   (seq_licenseinfo.nextval, ?, ?, ?, ?, ?, ?, sysdate, 1, 0)
 
 oracle in操作符参数(Oracle 9i 中个数不能超过256,Oracle 10g个数不能超过1000)
