@@ -3,3 +3,10 @@ https://www.cnblogs.com/Terry-Wu/p/7383839.html
 
 Windows路由表详解
 https://blog.51cto.com/tonyguo/176104
+
+oracle索引总结
+https://www.cnblogs.com/wishyouhappy/p/3681771.html
+
+cpu个数、核数、线程数、Java多线程关系的理解
+计算密集型是和CPU线程数一样 io密集型是CPU线程数的2倍
+https://blog.csdn.net/wutongyuWxc/article/details/78732287
