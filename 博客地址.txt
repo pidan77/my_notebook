@@ -10,3 +10,9 @@ https://www.cnblogs.com/wishyouhappy/p/3681771.html
 cpu个数、核数、线程数、Java多线程关系的理解
 计算密集型是和CPU线程数一样 io密集型是CPU线程数的2倍
 https://blog.csdn.net/wutongyuWxc/article/details/78732287
+
+分布式锁的几种实现方式
+https://www.cnblogs.com/austinspark-jessylu/p/8043726.html
+
+PECS泛型通配符extends与super上下界限的理解
+https://blog.csdn.net/wang252949/article/details/80583093
