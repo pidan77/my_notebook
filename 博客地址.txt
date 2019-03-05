@@ -14,5 +14,5 @@ https://blog.csdn.net/wutongyuWxc/article/details/78732287
 分布式锁的几种实现方式
 https://www.cnblogs.com/austinspark-jessylu/p/8043726.html
 
-PECS泛型通配符extends与super上下界限的理解
+PECS泛型通配符extends与super上下界限的理解(结合访问者模式体会)
 https://blog.csdn.net/wang252949/article/details/80583093
